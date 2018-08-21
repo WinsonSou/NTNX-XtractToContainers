@@ -46,15 +46,15 @@ def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print(output.decode('utf-8'))
     print('DEBUG: running apt update, pause 15 secs')
     channel.send('sudo apt update' + '\n')
-    time.sleep(15) #15s wait for apt update to complete
+    time.sleep(1) #15s wait for apt update to complete ### REMEMEBER TO CHANGE TO 15
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
 
     #Install Python-Pip & pip install Blueprint
     print('DEBUG: Installing Python-Pip and Blueprint on Remote Server, pause 180 secs')
     channel.send('sudo apt install -y python-pip git && sudo pip install blueprint' + '\n')
-    time.sleep(180) #120s wait for python-pip & blueprint to be installed
-    output = channel.recv(9999) #read in
+    time.sleep(1) #180s wait for python-pip & blueprint to be installed ### REMEMEBER TO CHANGE TO 180
+    output = channel.recv(99999) #read in
     print(output.decode('utf-8'))
 
     channel.close()
@@ -94,20 +94,21 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     print('DEBUG: Running Blueprint operation, pause 60 secs')
     channel.send('sudo blueprint create sourcevm' + '\n')
     time.sleep(60) #wait enough for blueprinting to finish
+    print('DEBUG: Blueprint operation complete')
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
     time.sleep(0.1)
 
     #Generate Source VM Tarball and Bootstraper and copy locally
-    print('DEBUG: Blueprint operation complete')
     print('DEBUG: Creating Bootstrapper and Tarball, pause 60 secs')
-    channel.send('sudo blueprint show -S sourcevm && pwd' + '\n')
+    channel.send('sudo blueprint show -S sourcevm' + '\n')
     time.sleep(60) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
     print('DEBUG: Tarball and Bootsrapper created, copying to master')
     print('DEBUG: Copy Phase: renaming tarball')
-    channel.send('sudo /tmp/blueprint/sourcevm && sudo cp *.tar sourcevm.tar' + '\n')
+    channel.send('sudo /tmp/blueprint/sourcevm' + '\n')
+    channel.send('sudo cp *.tar sourcevm.tar' + '\n')
     time.sleep(0.5)
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
