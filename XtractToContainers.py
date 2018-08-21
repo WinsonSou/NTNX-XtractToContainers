@@ -2,6 +2,8 @@
 
 import paramiko
 import time
+import os
+import argparse
 
 def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print('DEBUG: Installing Blueprint to Remote Server')
@@ -92,10 +94,26 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     print(output.decode('utf-8'))
     channel.send('sudo cd /tmp/blueprint/sourcevm && sudo cp *.tar sourcevm.tar' + '\n')
     channel.recv(9999)
-    ftp.get('/tmp/blueprint/sourcevm/sourcevm.tar','C:\\temp\\sourcevm.tar')
-    ftp.get('/tmp/blueprint/sourcevm/bootstrap.sh','C:\\temp\\bootstrap.sh')
+    if not os.path.exists('/tmp/xtract'):
+        os.makedirs('/tmp/xtract/')
+    ftp.get('/tmp/blueprint/sourcevm/sourcevm.tar','/tmp/xtract')
+    ftp.get('/tmp/blueprint/sourcevm/bootstrap.sh','/tmp/xtract')
+
+#def BuildDockerFile():
+    #echo true
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Xtract for Containers')
+    parser.add_argument('vm_ip', help='IP Address of the VM')
+    parser.add_argument('vm_username', help='Username of the VM')
+    parser.add_argument('vm_password', help='Password of the VM')
     
+    args = parser.parse_args()
+    InstallBlueprintOnSourceUbuntu(args.vm_ip, args.vm_username, args.vm_password)
 
 
 
-InstallBlueprintOnSourceUbuntu('10.139.76.160', 'ubuntu', 'nutanix/4u')
+
+
+
