@@ -7,12 +7,6 @@ import argparse
 
 def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print('DEBUG: Installing Blueprint to Remote Server')
-    ''' 
-    #For Debugging
-    vm_ip='10.139.76.160'
-    vm_username='ubuntu'
-    vm_password='nutanix/4u' 
-    '''
 
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -34,7 +28,7 @@ def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
             time.sleep(1)
         time.sleep(1) #wait enough for writing to (hopefully) be finished
         output = channel.recv(9999) #read in
-        print(output.decode('utf-8'))
+        #print(output.decode('utf-8'))
         time.sleep(0.1)
 
     #Enable universe sources & update repos: FOR UBUNTU ONLY
@@ -43,19 +37,19 @@ def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print('DEBUG: Enabling universe sources, pause 10 secs')
     time.sleep(10) #10s wait for universe sources to be setup
     output = channel.recv(9999) #read in
-    print(output.decode('utf-8'))
+    #print(output.decode('utf-8'))
     print('DEBUG: running apt update, pause 15 secs')
     channel.send('sudo apt update' + '\n')
-    time.sleep(1) #15s wait for apt update to complete ### REMEMEBER TO CHANGE TO 15
+    time.sleep(15) #15s wait for apt update to complete ### REMEMEBER TO CHANGE TO 15
     output = channel.recv(9999) #read in
-    print(output.decode('utf-8'))
+    #print(output.decode('utf-8'))
 
     #Install Python-Pip & pip install Blueprint
     print('DEBUG: Installing Python-Pip and Blueprint on Remote Server, pause 180 secs')
     channel.send('sudo apt install -y python-pip git && sudo pip install blueprint' + '\n')
-    time.sleep(1) #180s wait for python-pip & blueprint to be installed ### REMEMEBER TO CHANGE TO 180
+    time.sleep(180) #180s wait for python-pip & blueprint to be installed ### REMEMEBER TO CHANGE TO 180
     output = channel.recv(99999) #read in
-    print(output.decode('utf-8'))
+    #print(output.decode('utf-8'))
 
     channel.close()
 
@@ -82,7 +76,7 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
             time.sleep(1)
         time.sleep(1) #wait enough for writing to (hopefully) be finished
         output = channel.recv(9999) #read in
-        print(output.decode('utf-8'))
+        #print(output.decode('utf-8'))
         time.sleep(0.1)
     
     #Blueprint the Source VM
@@ -96,7 +90,7 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     time.sleep(15) #wait enough for blueprinting to finish
     print('DEBUG: Blueprint operation complete')
     output = channel.recv(9999) #read in
-    print(output.decode('utf-8'))
+    #print(output.decode('utf-8'))
     time.sleep(0.1)
 
     #Generate Source VM Tarball and Bootstraper and copy locally
@@ -104,14 +98,14 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     channel.send('sudo blueprint show -S sourcevm' + '\n')
     time.sleep(5) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
-    print(output.decode('utf-8'))
+    #print(output.decode('utf-8'))
     print('DEBUG: Tarball and Bootsrapper created, copying to master')
     print('DEBUG: Copy Phase: renaming tarball')
     channel.send('cd /tmp/blueprint/sourcevm' + '\n')
     channel.send('sudo cp *.tar sourcevm.tar' + '\n')
     time.sleep(0.5)
     output = channel.recv(9999) #read in
-    print(output.decode('utf-8'))
+    #print(output.decode('utf-8'))
     print('DEBUG: Copy Phase: Creating Local tmp directories on master')
     if not os.path.exists('/tmp/xtract'):
         os.makedirs('/tmp/xtract/')
