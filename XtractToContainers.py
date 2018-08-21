@@ -107,8 +107,8 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     print(output.decode('utf-8'))
     print('DEBUG: Tarball and Bootsrapper created, copying to master')
     print('DEBUG: Copy Phase: renaming tarball')
-    channel.send('sudo cd /tmp/blueprint/sourcevm && sudo cp *.tar sourcevm.tar' + '\n')
-    time.sleep(0.5) #wait enough for blueprinting to finish
+    channel.send('sudo /tmp/blueprint/sourcevm && sudo cp *.tar sourcevm.tar' + '\n')
+    time.sleep(0.5)
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
     print('DEBUG: Copy Phase: Creating Local tmp directories on master')
