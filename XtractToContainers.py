@@ -26,6 +26,7 @@ def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     time.sleep(1)
 
     #Enter sudo mode for all commands run from here on out: FOR UBUNTU ONLY!
+    print('DEBUG: Entering sudo mode')
     sudo_cmds = ['sudo su -', vm_password, 'whoami']
     for sudo_cmd in sudo_cmds:
         channel.send(sudo_cmd + '\n')
@@ -37,18 +38,22 @@ def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
         time.sleep(0.1)
 
     #Enable universe sources & update repos: FOR UBUNTU ONLY
+
     channel.send('sudo add-apt-repository universe' + '\n')
+    print('DEBUG: Enabling universe sources')
     time.sleep(10) #10s wait for universe sources to be setup
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
+    print('DEBUG: running apt update')
     channel.send('sudo apt update' + '\n')
     time.sleep(15) #15s wait for apt update to complete
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
 
     #Install Python-Pip & pip install Blueprint
+    print('DEBUG: Installing Python-Pip and Blueprint on Remote Server')
     channel.send('sudo apt install -y python-pip git && sudo pip install blueprint' + '\n')
-    time.sleep(120) #120s wait for python-pip & blueprint to be installed
+    time.sleep(180) #120s wait for python-pip & blueprint to be installed
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
 
@@ -83,7 +88,7 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     channel.send('git config --global user.email "winson.sou@nutanix.com" && git config --global user.name "WinsonSou"' + '\n')#init git
     channel.send('mkdir /tmp/blueprint && cd /tmp/blueprint' + '\n')
     channel.send('sudo blueprint create sourcevm' + '\n')
-    time.sleep(30) #wait enough for blueprinting to finish
+    time.sleep(60) #wait enough for blueprinting to finish
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
     time.sleep(0.1)
@@ -111,6 +116,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     InstallBlueprintOnSourceUbuntu(args.vm_ip, args.vm_username, args.vm_password)
+    BlueprintSourceVM(args.vm_ip, args.vm_username, args.vm_password)
 
 
 
