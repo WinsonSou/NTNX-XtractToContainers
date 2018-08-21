@@ -91,23 +91,23 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     channel.send('git config --global user.email "winson.sou@nutanix.com" && git config --global user.name "WinsonSou"' + '\n')#init git
     print('DEBUG: Creating tmp directories on SourceVM')
     channel.send('mkdir /tmp/blueprint && cd /tmp/blueprint' + '\n')
-    print('DEBUG: Running Blueprint operation, pause 60 secs')
+    print('DEBUG: Running Blueprint operation, pause 15 secs')
     channel.send('sudo blueprint create sourcevm' + '\n')
-    time.sleep(60) #wait enough for blueprinting to finish
+    time.sleep(15) #wait enough for blueprinting to finish
     print('DEBUG: Blueprint operation complete')
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
     time.sleep(0.1)
 
     #Generate Source VM Tarball and Bootstraper and copy locally
-    print('DEBUG: Creating Bootstrapper and Tarball, pause 60 secs')
+    print('DEBUG: Creating Bootstrapper and Tarball, pause 5 secs')
     channel.send('sudo blueprint show -S sourcevm' + '\n')
-    time.sleep(60) #wait enough for tarball and boostrap to finish
+    time.sleep(5) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
     print('DEBUG: Tarball and Bootsrapper created, copying to master')
     print('DEBUG: Copy Phase: renaming tarball')
-    channel.send('sudo /tmp/blueprint/sourcevm' + '\n')
+    channel.send('cd /tmp/blueprint/sourcevm' + '\n')
     channel.send('sudo cp *.tar sourcevm.tar' + '\n')
     time.sleep(0.5)
     output = channel.recv(9999) #read in
