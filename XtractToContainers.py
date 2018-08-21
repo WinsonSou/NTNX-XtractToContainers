@@ -40,18 +40,18 @@ def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     #Enable universe sources & update repos: FOR UBUNTU ONLY
 
     channel.send('sudo add-apt-repository universe' + '\n')
-    print('DEBUG: Enabling universe sources')
+    print('DEBUG: Enabling universe sources, pause 10 secs')
     time.sleep(10) #10s wait for universe sources to be setup
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
-    print('DEBUG: running apt update')
+    print('DEBUG: running apt update, pause 15 secs')
     channel.send('sudo apt update' + '\n')
     time.sleep(15) #15s wait for apt update to complete
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
 
     #Install Python-Pip & pip install Blueprint
-    print('DEBUG: Installing Python-Pip and Blueprint on Remote Server')
+    print('DEBUG: Installing Python-Pip and Blueprint on Remote Server, pause 180 secs')
     channel.send('sudo apt install -y python-pip git && sudo pip install blueprint' + '\n')
     time.sleep(180) #120s wait for python-pip & blueprint to be installed
     output = channel.recv(9999) #read in
@@ -74,6 +74,7 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     time.sleep(1)
 
     #Enter sudo mode for all commands run from here on out: FOR UBUNTU ONLY!
+    print('DEBUG: Entering sudo mode')
     sudo_cmds = ['sudo su -', vm_password, 'whoami']
     for sudo_cmd in sudo_cmds:
         channel.send(sudo_cmd + '\n')
@@ -85,24 +86,36 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
         time.sleep(0.1)
     
     #Blueprint the Source VM
+    print('DEBUG: Starting Blueprint operation')
+    print('DEBUG: Configuring Git')
     channel.send('git config --global user.email "winson.sou@nutanix.com" && git config --global user.name "WinsonSou"' + '\n')#init git
+    print('DEBUG: Creating tmp directories on SourceVM')
     channel.send('mkdir /tmp/blueprint && cd /tmp/blueprint' + '\n')
-    channel.send('sudo blueprint create sourcevm' + '\n')
+    print('DEBUG: Running Blueprint operation')
+    channel.send('sudo blueprint create sourcevm, Pause 60 secs' + '\n')
     time.sleep(60) #wait enough for blueprinting to finish
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
     time.sleep(0.1)
 
     #Generate Source VM Tarball and Bootstraper and copy locally
+    print('DEBUG: Blueprint operation complete')
+    print('DEBUG: Creating Bootstrapper and Tarball, pause 5 secs')
     channel.send('sudo blueprint show -S sourcevm && pwd' + '\n')
+    time.sleep(60) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
     print(output.decode('utf-8'))
+    print('DEBUG: Tarball and Bootsrapper created, copying to master')
+    print('DEBUG: Copy Phase: renaming tarball')
     channel.send('sudo cd /tmp/blueprint/sourcevm && sudo cp *.tar sourcevm.tar' + '\n')
     channel.recv(9999)
+    print('DEBUG: Copy Phase: Creating Local tmp directories on master')
     if not os.path.exists('/tmp/xtract'):
         os.makedirs('/tmp/xtract/')
+    print('DEBUG: Copy Phase: Copying Tarball and bootstrapper to master')
     ftp.get('/tmp/blueprint/sourcevm/sourcevm.tar','/tmp/xtract')
     ftp.get('/tmp/blueprint/sourcevm/bootstrap.sh','/tmp/xtract')
+    #ADD CLEAN UP SOURCE VM /TMP FOLDER
 
 #def BuildDockerFile():
     #echo true
