@@ -9,8 +9,8 @@ import cgitb
 import subprocess
 import docker
 
-""" form = cgi.FieldStorage()
-
+""" 
+form = cgi.FieldStorage()
 vm_ip = form.getvalue('ipaddress')
 vm_username = form.getvalue('username')
 vm_password = form.getvalue('password')
@@ -19,11 +19,7 @@ containertag  = form.getvalue('containertag')
 dockerrepo  = form.getvalue('dockerrepo')
 dockerusername = form.getvalue('dockerusername')
 dockerpassword = form.getvalue('dockerpassword')
- """
-
-vm_ip = '10.139.76.136'
-vm_username = 'ubuntu'
-vm_password = 'nutanix/4u'
+"""
 
 def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print('DEBUG: Installing Blueprint to Remote Server')
@@ -229,19 +225,19 @@ def BuildContainer(ctag, drepo, dusername, dpassword):
 
 if __name__ == '__main__':
 
-    """ parser = argparse.ArgumentParser(description='Xtract for Containers')
-        parser.add_argument('vm_ip', help='IP Address of the VM')
-        parser.add_argument('vm_username', help='Username of the VM')
-        parser.add_argument('vm_password', help='Password of the VM')
-        
-        args = parser.parse_args()
+    parser = argparse.ArgumentParser(description='Xtract for Containers')
+    parser.add_argument('vm_ip', help='IP Address of the VM')
+    parser.add_argument('vm_username', help='Username of the VM')
+    parser.add_argument('vm_password', help='Password of the VM')
+    parser.add_argument('containertag', help='Tag of the Container')
+    parser.add_argument('dockerrepo', help='Docker Repo')
+    parser.add_argument('dockerusername', help='Dockerhub Username')
+    parser.add_argument('dockerpassword', help='Dockerhub Password')
 
-        InstallBlueprintOnSourceUbuntu(args.vm_ip, args.vm_username, args.vm_password)
-        BlueprintSourceVM(args.vm_ip, args.vm_username, args.vm_password)
-        BuildDockerFile() """
+    args = parser.parse_args()
 
     InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password)
     BlueprintSourceVM(vm_ip, vm_username, vm_password)
     packageManager()
     BuildDockerFile()
-    BuildContainer()
+    BuildContainer(containertag, dockerrepo, dockerusername, dockerpassword)
