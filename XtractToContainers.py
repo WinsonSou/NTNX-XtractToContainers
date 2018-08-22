@@ -114,8 +114,37 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     ftp.get('/tmp/blueprint/sourcevm/bootstrap.sh','/tmp/xtract/bootstrap.sh')
     #ADD CLEAN UP SOURCE VM /TMP FOLDER
 
-#def BuildDockerFile():
-    #echo true
+#def GetOSType(vm_ip, vm_username, vm_password):
+
+def BuildDockerFile():
+    
+    if os.path.isfile('/tmp/xtract/Dockerfile'):
+        os.remove('/tmp/xtract/Dockerfile')
+        df = open('/tmp/xtract/Dockerfile','a+')
+        df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
+        df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper into Container
+        df.write('RUN %s \r\n' % ('chmod +x bootstrap.sh && ./bootstrap.sh')) #Executes Bootstrapper in Container
+        df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
+        df.write('WORKDIR %s \r\n' % ('/usr/local/www/html'))
+        df.write('RUN %s \r\n' % ('npm build && forever start server.js'))
+        df.write('EXPOSE %s \r\n' % ('80'))
+        df.write('CMD %s \r\n' % ('["nginx", "-g", "daemon off;"]'))
+        df.close()
+
+    elif not os.path.isfile('/tmp/xtract/Dockerfile'):
+        df = open('/tmp/xtract/Dockerfile','a+')
+        df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
+        df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper into Container
+        df.write('RUN %s \r\n' % ('chmod +x bootstrap.sh && ./bootstrap.sh')) #Executes Bootstrapper in Container
+        df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
+        df.write('WORKDIR %s \r\n' % ('/usr/local/www/html'))
+        df.write('RUN %s \r\n' % ('npm build && forever start server.js'))
+        df.write('EXPOSE %s \r\n' % ('80'))
+        df.write('CMD %s \r\n' % ('["nginx", "-g", "daemon off;"]'))
+        df.close()
+
+
+    
 
 if __name__ == '__main__':
 
@@ -127,6 +156,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     InstallBlueprintOnSourceUbuntu(args.vm_ip, args.vm_username, args.vm_password)
     BlueprintSourceVM(args.vm_ip, args.vm_username, args.vm_password)
+    BuildDockerFile()
 
 
 
