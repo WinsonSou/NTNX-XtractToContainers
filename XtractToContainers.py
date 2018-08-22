@@ -7,7 +7,7 @@ import argparse
 import cgi
 import cgitb
 
-form = cgi.FieldStorage()
+""" form = cgi.FieldStorage()
 
 vm_ip = form.getvalue('ipaddress')
 vm_username = form.getvalue('username')
@@ -17,7 +17,7 @@ containertag  = form.getvalue('containertag')
 dockerrepo  = form.getvalue('dockerrepo')
 dockerusername = form.getvalue('dockerusername')
 dockerpassword = form.getvalue('dockerpassword')
-
+ """
 def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print('DEBUG: Installing Blueprint to Remote Server')
 
@@ -112,7 +112,10 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     time.sleep(5) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
     #print(output.decode('utf-8'))
-    print('DEBUG: Tarball and Bootsrapper created, copying to master')
+    print('DEBUG: Creating List of installed Packages')
+    channel.send('sudo blueprint show-packages sourcevm > packages.txt' + '\n')
+    output = channel.recv(9999) #read in
+    print('DEBUG: Tarball, Bootstrapper and Package List created, copying to master')
     print('DEBUG: Copy Phase: renaming tarball')
     channel.send('cd /tmp/blueprint/sourcevm' + '\n')
     channel.send('sudo cp *.tar sourcevm.tar' + '\n')
@@ -125,9 +128,44 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     print('DEBUG: Copy Phase: Copying Tarball and bootstrapper to master')
     ftp.get('/tmp/blueprint/sourcevm/sourcevm.tar','/tmp/xtract/sourcevm.tar')
     ftp.get('/tmp/blueprint/sourcevm/bootstrap.sh','/tmp/xtract/bootstrap.sh')
+    ftp.get('/tmp/blueprint/sourcevm/packages.txt','/tmp/xtract/packages.txt')
     #ADD CLEAN UP SOURCE VM /TMP FOLDER
 
 #def GetOSType(vm_ip, vm_username, vm_password):
+
+def packageManager():
+
+        blacklisted_packages = []
+        with open('PackageBlacklistUbuntu.txt','r+') as ubuntuPackageBlacklist:
+            for line in ubuntuPackageBlacklist:
+                blacklisted_packages.append(line)
+            ubuntuPackageBlacklist.close()
+
+        #Preparing list of Existing Packages
+        #remove 'apt '
+        with open('/tmp/xtract/packages.txt', 'r') as existingPackage, open('/tmp/xtract/aptcleanpackages.txt', 'w+') as aptcleanpackages:
+            for line in existingPackage:
+                line = line.replace('apt ', '')
+                aptcleanpackages.write(line)
+            aptcleanpackages.close()
+            existingPackage.close()
+
+            #remove versions from packages
+        with open('/tmp/xtract/aptcleanpackages.txt', 'r+') as aptcleanpackages, open('/tmp/xtract/versioncleanpackages.txt', 'w+') as versioncleanpackages:
+            for line in aptcleanpackages:
+                seperator = ' '
+                line = line.split(seperator, 1)[0]
+                versioncleanpackages.write(line + '\n')    
+            aptcleanpackages.close()
+            versioncleanpackages.close()
+
+        #remove blacklisted packages
+        with open('/tmp/xtract/versioncleanpackages.txt', 'r+') as versioncleanpackages, open('/tmp/xtract/packagesToBeInstalled.txt', 'a+') as packagesToBeInstalled:
+            for line in versioncleanpackages:
+                if not any(blacklisted in line for blacklisted in blacklisted_packages):
+                    packagesToBeInstalled.write(line)
+            versioncleanpackages.close()
+            packagesToBeInstalled.close()
 
 def BuildDockerFile():
     
@@ -135,8 +173,9 @@ def BuildDockerFile():
         os.remove('/tmp/xtract/Dockerfile')
         df = open('/tmp/xtract/Dockerfile','a+')
         df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
-        df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper into Container
-        df.write('RUN %s \r\n' % ('chmod +x bootstrap.sh && ./bootstrap.sh')) #Executes Bootstrapper in Container
+        df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper and Package Requirements into Container
+        df.write('RUN %s \r\n' % ('apt-get update && cat packagesToBeInstalled.txt | xargs apt-get install -y --no-install-recommends && apt-get -y install npm')) #Executes Bootstrapper in Container
+        df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && tar xf "sourcevm.tar" -C "/usr/local"')) #Installs Forever
         df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
         df.write('WORKDIR %s \r\n' % ('/usr/local/www/html'))
         df.write('RUN %s \r\n' % ('npm build && forever start server.js'))
@@ -145,17 +184,18 @@ def BuildDockerFile():
         df.close()
 
     elif not os.path.isfile('/tmp/xtract/Dockerfile'):
+        os.remove('/tmp/xtract/Dockerfile')
         df = open('/tmp/xtract/Dockerfile','a+')
         df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
-        df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper into Container
-        df.write('RUN %s \r\n' % ('chmod +x bootstrap.sh && ./bootstrap.sh')) #Executes Bootstrapper in Container
+        df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper and Package Requirements into Container
+        df.write('RUN %s \r\n' % ('apt-get update && cat packagesToBeInstalled.txt | xargs apt-get install -y --no-install-recommends && apt-get -y install npm')) #Executes Bootstrapper in Container
+        df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && tar xf "sourcevm.tar" -C "/usr/local"')) #Installs Forever
         df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
         df.write('WORKDIR %s \r\n' % ('/usr/local/www/html'))
         df.write('RUN %s \r\n' % ('npm build && forever start server.js'))
         df.write('EXPOSE %s \r\n' % ('80'))
         df.write('CMD %s \r\n' % ('["nginx", "-g", "daemon off;"]'))
         df.close()
-
 
     
 
@@ -180,3 +220,11 @@ if __name__ == '__main__':
 
 
 
+#from package manager section
+    '''ubuntu_blacklisted_packages_file = open('PackageBlacklistUbuntu.txt','r+')
+    blacklisted_packages = []
+    for line in ubuntu_blacklisted_packages_file.readlines():
+        blacklisted_packages.append(line)
+    ubuntu_blacklisted_packages_file.close()
+    print(blacklisted_packages)
+    '''
