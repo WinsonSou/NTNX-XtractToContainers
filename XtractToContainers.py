@@ -9,7 +9,7 @@ import cgitb
 import subprocess
 import docker
 
-""" 
+"""
 form = cgi.FieldStorage()
 vm_ip = form.getvalue('ipaddress')
 vm_username = form.getvalue('username')
@@ -236,8 +236,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password)
-    BlueprintSourceVM(vm_ip, vm_username, vm_password)
+    InstallBlueprintOnSourceUbuntu(args.vm_ip, args.vm_username, args.vm_password)
+    BlueprintSourceVM(args.vm_ip, args.vm_username, args.vm_password)
     packageManager()
     BuildDockerFile()
-    BuildContainer(containertag, dockerrepo, dockerusername, dockerpassword)
+    BuildContainer(args.containertag, args.dockerrepo, args.dockerusername, args.dockerpassword)
