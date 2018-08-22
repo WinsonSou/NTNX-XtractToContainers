@@ -60,14 +60,14 @@ def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     #print(output.decode('utf-8'))
     print('DEBUG: running apt update, pause 15 secs')
     channel.send('sudo apt update' + '\n')
-    time.sleep(15) #15s wait for apt update to complete ### REMEMEBER TO CHANGE TO 15
+    time.sleep(15) #15s wait for apt update to complete ### REMEMBER TO CHANGE TO 15
     output = channel.recv(9999) #read in
     #print(output.decode('utf-8'))
 
     #Install Python-Pip & pip install Blueprint
     print('DEBUG: Installing Python-Pip and Blueprint on Remote Server, pause 180 secs')
     channel.send('sudo apt install -y python-pip git && sudo pip install blueprint' + '\n')
-    time.sleep(10) #180s wait for python-pip & blueprint to be installed ### REMEMEBER TO CHANGE TO 180
+    time.sleep(180) #180s wait for python-pip & blueprint to be installed ### REMEMBER TO CHANGE TO 180
     output = channel.recv(99999) #read in
     #print(output.decode('utf-8'))
 
