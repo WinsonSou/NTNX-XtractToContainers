@@ -188,21 +188,22 @@ def BuildDockerFile():
     print('DEBUG: Building Dockerfile')    
     
     if os.path.isfile('/tmp/xtract/Dockerfile'):
+        print('DEBUG: Building Dockerfile: Existing Dockerfile Exists, Deleting and Recreating')
         os.remove('/tmp/xtract/Dockerfile')
         df = open('/tmp/xtract/Dockerfile','a+')
         df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
-        df.write('ADD %s \r\n' % ('/tmp/xtract/ .')) #Adds Tarball and Boostrapper and Package Requirements into Container
-        df.write('RUN %s \r\n' % ('apt-get update && cat packagesToBeInstalled.txt | xargs apt-get install -y --no-install-recommends && apt-get -y install npm')) #Executes Bootstrapper in Container
-        df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && mkdir -p "/etc/nginx" && tar xf "sourcevm.tar" -C "/usr/local" && tar xf "nginx.tar" -C "/"'))
-        df.write('RUN %s \r\n' % (''))
-        df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
+        df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper and Package Requirements into Container
+        df.write('RUN %s \r\n' % ('apt-get update && cat packagesToBeInstalled.txt | xargs apt-get install -y --no-install-recommends')) #Executes Bootstrapper in Container
+        df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && tar xf "sourcevm.tar" -C "/usr/local"')) #Replaces filesystem in container with sourcevm filesystem
+        #df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
         df.write('WORKDIR %s \r\n' % ('/usr/local/www/html'))
-        df.write('RUN %s \r\n' % ('npm build && forever start server.js'))
+        #df.write('RUN %s \r\n' % ('npm build && forever start server.js'))
         df.write('EXPOSE %s \r\n' % ('80'))
         df.write('CMD %s \r\n' % ('["nginx", "-g", "daemon off;"]'))
         df.close()
 
     elif not os.path.isfile('/tmp/xtract/Dockerfile'):
+        print('DEBUG: Building Dockerfile: No Dockerfile Exists, Creating New Dockerfile')
         df = open('/tmp/xtract/Dockerfile','a+')
         df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
         df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper and Package Requirements into Container
@@ -218,7 +219,7 @@ def BuildDockerFile():
 
 def BuildContainer(ctag, drepo, dusername, dpassword):
     imagetag = 'docker.io/' + dusername + '/' + drepo + ':' + ctag
-    print(imagetag)
+    print('Image Tag of Container is: ' + imagetag)
     print('DEBUG: Building Container from Dockerfile')
     client = docker.from_env()
     output = client.images.build(path='/tmp/xtract/',tag=imagetag)
