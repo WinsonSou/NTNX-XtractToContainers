@@ -65,7 +65,7 @@ def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     #Install Python-Pip & pip install Blueprint
     print('DEBUG: Installing Python-Pip and Blueprint on Remote Server, pause 180 secs')
     channel.send('sudo apt install -y python-pip git && sudo pip install blueprint' + '\n')
-    time.sleep(180) #180s wait for python-pip & blueprint to be installed ### REMEMEBER TO CHANGE TO 180
+    time.sleep(10) #180s wait for python-pip & blueprint to be installed ### REMEMEBER TO CHANGE TO 180
     output = channel.recv(99999) #read in
     #print(output.decode('utf-8'))
 
@@ -118,7 +118,7 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     output = channel.recv(9999) #read in
     #print(output.decode('utf-8'))
     print('DEBUG: Creating List of installed Packages')
-    channel.send('sudo blueprint show-packages sourcevm > packages.txt' + '\n')
+    channel.send('sudo blueprint show-packages sourcevm > /tmp/blueprint/sourcevm/packages.txt' + '\n')
     output = channel.recv(9999) #read in
     print('DEBUG: Tarball, Bootstrapper and Package List created, copying to XtractVM')
     print('DEBUG: Copy Phase: renaming tarball')
