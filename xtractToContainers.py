@@ -20,6 +20,8 @@ dockerrepo  = form.getvalue('dockerrepo')
 dockerusername = form.getvalue('dockerusername')
 dockerpassword = form.getvalue('dockerpassword')
 """
+#Usage
+#./xtractToContainers.py 'VM IP Address' 'VM Username' 'VM Password' 'Container Tags' 'Repository  Name' 'Dockerhub username' 'Dockerhub password'
 
 def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print('DEBUG: Installing Blueprint to Remote Server')
