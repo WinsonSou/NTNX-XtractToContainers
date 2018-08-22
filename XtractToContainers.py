@@ -109,9 +109,9 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     #print(output.decode('utf-8'))
 
     #Generate Source VM Tarball and Bootstraper and copy locally
-    print('DEBUG: Creating Bootstrapper and Tarball, pause 30 secs')
+    print('DEBUG: Creating Bootstrapper and Tarball, pause 10 secs')
     channel.send('cd /tmp/blueprint && sudo blueprint show -S sourcevm' + '\n')
-    time.sleep(30) #wait enough for tarball and boostrap to finish
+    time.sleep(10) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
     print(output.decode('utf-8')) #DEBUG#
     print('DEBUG: Creating List of installed Packages')
@@ -121,7 +121,7 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     print('DEBUG: Copy Phase: renaming tarball')
     channel.send('cd /tmp/blueprint/sourcevm' + '\n')
     channel.send('sudo cp *.tar sourcevm.tar' + '\n')
-    channel.send('tar -cvf nginx.tar /etc/nginx/')
+    channel.send('tar -cvf nginx.tar /etc/nginx/' + '\n')
     time.sleep(0.5)
     output = channel.recv(9999) #read in
     #print(output.decode('utf-8'))
