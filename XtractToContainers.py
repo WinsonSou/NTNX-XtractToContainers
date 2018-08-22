@@ -18,6 +18,11 @@ dockerrepo  = form.getvalue('dockerrepo')
 dockerusername = form.getvalue('dockerusername')
 dockerpassword = form.getvalue('dockerpassword')
  """
+
+vm_ip = '10.139.76.136'
+vm_username = 'ubuntu'
+vm_password = 'nutanix/4u'
+
 def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print('DEBUG: Installing Blueprint to Remote Server')
 
@@ -98,34 +103,34 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     channel.send('git config --global user.email "winson.sou@nutanix.com" && git config --global user.name "WinsonSou"' + '\n')#init git
     print('DEBUG: Creating tmp directories on SourceVM')
     channel.send('mkdir /tmp/blueprint && cd /tmp/blueprint' + '\n')
-    print('DEBUG: Running Blueprint operation, pause 15 secs')
+    print('DEBUG: Running Blueprint operation, pause 30 secs')
     channel.send('sudo blueprint create sourcevm' + '\n')
-    time.sleep(15) #wait enough for blueprinting to finish
+    time.sleep(30) #wait enough for blueprinting to finish
     print('DEBUG: Blueprint operation complete')
     output = channel.recv(9999) #read in
     #print(output.decode('utf-8'))
     time.sleep(0.1)
 
     #Generate Source VM Tarball and Bootstraper and copy locally
-    print('DEBUG: Creating Bootstrapper and Tarball, pause 5 secs')
+    print('DEBUG: Creating Bootstrapper and Tarball, pause 10 secs')
     channel.send('sudo blueprint show -S sourcevm' + '\n')
-    time.sleep(5) #wait enough for tarball and boostrap to finish
+    time.sleep(10) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
     #print(output.decode('utf-8'))
     print('DEBUG: Creating List of installed Packages')
     channel.send('sudo blueprint show-packages sourcevm > packages.txt' + '\n')
     output = channel.recv(9999) #read in
-    print('DEBUG: Tarball, Bootstrapper and Package List created, copying to master')
+    print('DEBUG: Tarball, Bootstrapper and Package List created, copying to XtractVM')
     print('DEBUG: Copy Phase: renaming tarball')
     channel.send('cd /tmp/blueprint/sourcevm' + '\n')
     channel.send('sudo cp *.tar sourcevm.tar' + '\n')
     time.sleep(0.5)
     output = channel.recv(9999) #read in
     #print(output.decode('utf-8'))
-    print('DEBUG: Copy Phase: Creating Local tmp directories on master')
+    print('DEBUG: Copy Phase: Creating Local tmp directories on XtractVM')
     if not os.path.exists('/tmp/xtract'):
         os.makedirs('/tmp/xtract/')
-    print('DEBUG: Copy Phase: Copying Tarball and bootstrapper to master')
+    print('DEBUG: Copy Phase: Copying Tarball and bootstrapper to XtractVM')
     ftp.get('/tmp/blueprint/sourcevm/sourcevm.tar','/tmp/xtract/sourcevm.tar')
     ftp.get('/tmp/blueprint/sourcevm/bootstrap.sh','/tmp/xtract/bootstrap.sh')
     ftp.get('/tmp/blueprint/sourcevm/packages.txt','/tmp/xtract/packages.txt')
@@ -173,7 +178,7 @@ def BuildDockerFile():
         os.remove('/tmp/xtract/Dockerfile')
         df = open('/tmp/xtract/Dockerfile','a+')
         df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
-        df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper and Package Requirements into Container
+        df.write('ADD %s \r\n' % ('/tmp/xtract/ .')) #Adds Tarball and Boostrapper and Package Requirements into Container
         df.write('RUN %s \r\n' % ('apt-get update && cat packagesToBeInstalled.txt | xargs apt-get install -y --no-install-recommends && apt-get -y install npm')) #Executes Bootstrapper in Container
         df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && tar xf "sourcevm.tar" -C "/usr/local"')) #Installs Forever
         df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
@@ -196,8 +201,6 @@ def BuildDockerFile():
         df.write('EXPOSE %s \r\n' % ('80'))
         df.write('CMD %s \r\n' % ('["nginx", "-g", "daemon off;"]'))
         df.close()
-
-    
 
 if __name__ == '__main__':
 
