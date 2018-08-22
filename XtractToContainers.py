@@ -189,7 +189,7 @@ def BuildDockerFile():
         df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
         df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper and Package Requirements into Container
         df.write('RUN %s \r\n' % ('apt-get update && cat packagesToBeInstalled.txt | xargs apt-get install -y --no-install-recommends')) #Executes Bootstrapper in Container
-        df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && tar xf "sourcevm.tar" -C "/usr/local"')) #Replaces filesystem in container with sourcevm filesystem
+        df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && tar xf "sourcevm.tar" -C "/usr/local" && tar xf "nginx.tar" -C "/"')) #Replaces filesystem in container with sourcevm filesystem
         #df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
         df.write('WORKDIR %s \r\n' % ('/usr/local/www/html'))
         #df.write('RUN %s \r\n' % ('npm build && forever start server.js'))
@@ -203,7 +203,7 @@ def BuildDockerFile():
         df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
         df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper and Package Requirements into Container
         df.write('RUN %s \r\n' % ('apt-get update && cat packagesToBeInstalled.txt | xargs apt-get install -y --no-install-recommends')) #Executes Bootstrapper in Container
-        df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && tar xf "sourcevm.tar" -C "/usr/local"')) #Replaces filesystem in container with sourcevm filesystem
+        df.write('RUN %s \r\n' % ('mkdir -p "/usr/local" && tar xf "sourcevm.tar" -C "/usr/local" && tar xf "nginx.tar" -C "/"')) #Replaces filesystem in container with sourcevm filesystem
         #df.write('RUN %s \r\n' % ('npm install forever -g')) #Installs Forever
         df.write('WORKDIR %s \r\n' % ('/usr/local/www/html'))
         #df.write('RUN %s \r\n' % ('npm build && forever start server.js'))
