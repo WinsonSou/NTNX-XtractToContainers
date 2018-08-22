@@ -189,7 +189,6 @@ def BuildDockerFile():
         df.close()
 
     elif not os.path.isfile('/tmp/xtract/Dockerfile'):
-        os.remove('/tmp/xtract/Dockerfile')
         df = open('/tmp/xtract/Dockerfile','a+')
         df.write('FROM %s \r\n' % ('ubuntu:18.04')) # sets a base image for the Container
         df.write('ADD %s \r\n' % ('. .')) #Adds Tarball and Boostrapper and Package Requirements into Container
@@ -217,6 +216,7 @@ if __name__ == '__main__':
 
     InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password)
     BlueprintSourceVM(vm_ip, vm_username, vm_password)
+    packageManager()
     BuildDockerFile()
 
 
