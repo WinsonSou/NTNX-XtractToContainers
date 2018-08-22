@@ -114,7 +114,7 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     channel.send('sudo blueprint show -S sourcevm' + '\n')
     time.sleep(10) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
-    #print(output.decode('utf-8'))
+    print(output.decode('utf-8')) #DEBUG#
     print('DEBUG: Creating List of installed Packages')
     channel.send('sudo blueprint show-packages sourcevm > /tmp/blueprint/sourcevm/packages.txt' + '\n')
     output = channel.recv(9999) #read in
