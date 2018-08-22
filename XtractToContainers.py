@@ -107,11 +107,10 @@ def BlueprintSourceVM(vm_ip, vm_username, vm_password):
     print('DEBUG: Blueprint operation complete')
     output = channel.recv(9999) #read in
     #print(output.decode('utf-8'))
-    time.sleep(0.1)
 
     #Generate Source VM Tarball and Bootstraper and copy locally
     print('DEBUG: Creating Bootstrapper and Tarball, pause 10 secs')
-    channel.send('sudo blueprint show -S sourcevm' + '\n')
+    channel.send('cd /tmp/blueprint && sudo blueprint show -S sourcevm' + '\n')
     time.sleep(10) #wait enough for tarball and boostrap to finish
     output = channel.recv(9999) #read in
     print(output.decode('utf-8')) #DEBUG#
