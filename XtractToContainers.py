@@ -4,6 +4,19 @@ import paramiko
 import time
 import os
 import argparse
+import cgi
+import cgitb
+
+form = cgi.FieldStorage()
+
+vm_ip = form.getvalue('ipaddress')
+vm_username = form.getvalue('username')
+vm_password = form.getvalue('password')
+containername  = form.getvalue('containername')
+containertag  = form.getvalue('containertag')
+dockerrepo  = form.getvalue('dockerrepo')
+dockerusername = form.getvalue('dockerusername')
+dockerpassword = form.getvalue('dockerpassword')
 
 def InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password):
     print('DEBUG: Installing Blueprint to Remote Server')
@@ -148,16 +161,20 @@ def BuildDockerFile():
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Xtract for Containers')
-    parser.add_argument('vm_ip', help='IP Address of the VM')
-    parser.add_argument('vm_username', help='Username of the VM')
-    parser.add_argument('vm_password', help='Password of the VM')
-    
-    args = parser.parse_args()
-    InstallBlueprintOnSourceUbuntu(args.vm_ip, args.vm_username, args.vm_password)
-    BlueprintSourceVM(args.vm_ip, args.vm_username, args.vm_password)
-    BuildDockerFile()
+    """ parser = argparse.ArgumentParser(description='Xtract for Containers')
+        parser.add_argument('vm_ip', help='IP Address of the VM')
+        parser.add_argument('vm_username', help='Username of the VM')
+        parser.add_argument('vm_password', help='Password of the VM')
+        
+        args = parser.parse_args()
 
+        InstallBlueprintOnSourceUbuntu(args.vm_ip, args.vm_username, args.vm_password)
+        BlueprintSourceVM(args.vm_ip, args.vm_username, args.vm_password)
+        BuildDockerFile() """
+
+    InstallBlueprintOnSourceUbuntu(vm_ip, vm_username, vm_password)
+    BlueprintSourceVM(vm_ip, vm_username, vm_password)
+    BuildDockerFile()
 
 
 
